@@ -8,11 +8,14 @@
 
 class Entity
 {
+public:
+	void Kill() { bIsAlive = false ;}
+	
 protected:
 	bool bIsAlive = true;
 	
 public:
-	bool IsAlive() const { return bIsAlive; }
+	bool GetIsAlive() const { return bIsAlive; }
 };
 
 /**
@@ -22,18 +25,72 @@ Derivar Jugador, Enemigo y Proyectil de Clase Base
 **/
 
 //Por si quiero tener mas de un tipo de player.
-Class PlayerBase : Entity
+class PlayerBase : Entity
 {
 	
 };
 
-//Voy a tener mas de un tipo de enemigo.
-Class EnemyBase : Entity
+/**
+*	Clase Base de Enemigo y Derivadas.
+**/
+
+class EnemyBase : Entity
 {
+public:
+	int HitPoints{1};
+	int PointsToGrant{0};
+	char Shape { 'E' };
 	
+	//La voy a marcar virtual por si quiero implementar algo distinto en hijos
+	virtual void OnHit()
+	{
+		HitPoints--;
+		if (HitPoints <= 0)
+		{
+			bIsAlive = false;
+		}
+	}
+	
+public:
+		int GetPointsToGrant() {return PointsToGrant;}
 };
 
-Class Projectile : Entity
+/***** Enemigo A *****/
+
+class EnemyA : public EnemyBase
+{
+	EnemyA ()
+	{
+		PointsToGrant = 10;
+		Shape = 'A';
+	}
+};
+
+/***** Enemigo B *****/
+
+class EnemyB : public EnemyBase
+{
+	EnemyB ()
+	{
+		PointsToGrant = 20;
+		Shape = 'B';
+	}
+};
+
+/***** Enemigo C *****/
+
+class EnemyC : public EnemyBase
+{
+	EnemyC ()
+	{
+		PointsToGrant = 30;
+		Shape = 'C';
+	}
+};
+
+/** Projectile **/
+
+class Projectile : Entity
 {
 	
 };
@@ -46,8 +103,20 @@ Crear una clase para el framework del juego (Puntaje, manejo de enemigos)
 
 **/
 
-int main(int argc, char *argv[]) {
+class Game
+{
+	
+public:
+	int Score{0};
+	bool Running = true;
+	bool Victory = false;
+};
+
+int main() 
+{
 	
 	return 0;
 }
+
+/** Funciones de ayuda **/
 
