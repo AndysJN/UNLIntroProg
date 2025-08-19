@@ -3,10 +3,42 @@
 #include <windows.h>
 
 /**
+*	Entidad Base
+**/
 
-Crear Clase Base
+class Entity
+{
+protected:
+	bool bIsAlive = true;
+	
+public:
+	bool IsAlive() const { return bIsAlive; }
+};
+
+/**
 
 Derivar Jugador, Enemigo y Proyectil de Clase Base
+
+**/
+
+//Por si quiero tener mas de un tipo de player.
+Class PlayerBase : Entity
+{
+	
+};
+
+//Voy a tener mas de un tipo de enemigo.
+Class EnemyBase : Entity
+{
+	
+};
+
+Class Projectile : Entity
+{
+	
+};
+
+/**
 
 Crear una configuracion para la pantalla
 
