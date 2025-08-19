@@ -154,6 +154,17 @@ public:
 	bool Running = true;
 	bool Victory = false;
 	
+	void Play()
+	{
+		ShowStartScreen();
+		ShowHUD();
+		while (Running)
+		{
+			Sleep(1000);
+			Running = false;
+		}
+	}
+	
 private:
 	void Initializate()
 	{
@@ -162,7 +173,30 @@ private:
 	
 	void ShowStartScreen()
 	{
-		
+		textcolor(BLUE);
+		gotoxy(25,3);
+		std::cout << "Trabajo Practico para UNL Introduccion Programacion 2025" << std::endl;
+		gotoxy(40,5);
+		std::cout << "Alumno: Andres Jorge Neville" << std::endl;
+		gotoxy(45,7);
+		std::cout << "SPACE INVADERS LITE" << std::endl;
+		textcolor(GREEN);
+		gotoxy(12 ,11);
+		std::cout << "Reglas:" << std::endl;
+		gotoxy(15 ,13);
+		std::cout << "- Mover la nave: 'a' izquierda, 'd' derecha" << std::endl;
+		gotoxy(15 ,14);
+		std::cout << "- Presione la tecla espaciadora para disparar" << std::endl;
+		gotoxy(15 ,15);
+		std::cout << "- Evitar los disparos enemigos" << std::endl;
+		gotoxy(15 ,16);
+		std::cout << "- Sobrevive eliminando a todos los enemigos antes que aterricen" << std::endl;
+		textcolor(RED);
+		gotoxy(35 ,25);
+		std::cout << "Presiona una Tecla para comenzar a Jugar" << std::endl;
+		getch();
+		textcolor(WHITE);
+		ScreenClear();
 	}
 	
 	void ShowEndScreen()
@@ -174,10 +208,14 @@ private:
 	{
 		
 	}
+	
+
 };
 
 int main() 
 {
+	Game G;
+	G.Play();
 	
 	return 0;
 }
