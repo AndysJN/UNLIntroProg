@@ -13,6 +13,37 @@ enum class Instigator
 };
 
 /**
+*	Seteo Dimensiones, limites y borde de pantalla
+**/
+
+class Screen
+	
+{
+	
+public:
+
+static const int bordeSup = 1;
+static const int bordeInf = 25;
+static const int bordeIzq = 1;
+static const int bordeDer = 100;
+
+static void DrawBorders()
+{
+	for (int x = bordeIzq; x <= bordeDer; ++x) 
+	{
+		putchxy(x, bordeInf, '.');
+	}
+	
+	for (int y = bordeSup; y <= bordeInf; ++y) 
+	{
+		putchxy(bordeIzq, y, '.');
+		putchxy(bordeDer, y, '.');
+	}
+}
+
+};
+
+/**
 *	Entidad Base
 **/
 
@@ -26,6 +57,7 @@ protected:
 	int X{0};
 	int Y{0};
 	//Ubicacion en pantalla
+	char Shape{};
 	
 	bool bIsAlive = true;
 	
@@ -38,7 +70,7 @@ public:
 **/
 
 //Por si quiero tener mas de un tipo de player.
-class PlayerBase : Entity
+class PlayerBase : public Entity
 {
 	
 protected:
@@ -58,6 +90,8 @@ public:
 	{
 		X = StartX;
 		Y = StartY;
+		textcolor(LIGHTBLUE);
+		putchxy(X,Y, 'A');
 	}
 	
 	int GetLives() const { return Lives; }
@@ -68,12 +102,12 @@ public:
 *	Clase Base de Enemigo y Derivadas.
 **/
 
-class EnemyBase : Entity
+class EnemyBase : public Entity
 {
 public:
 	int HitPoints{1};
 	int PointsToGrant{0};
-	char Shape { 'E' };
+	Shape = 'E' ;
 	
 	//Puedo implmementar diferentes comportamientos dependiendo el enemigo?
 	//Algunos se pueden poner un poco mas fuertes al recibir disparos ?
@@ -97,10 +131,12 @@ public:
 
 class EnemyA : public EnemyBase
 {
+	
+public:
 	EnemyA ()
 	{
 		PointsToGrant = 100;
-		Shape = 'A';
+		Shape = 'H';
 	}
 };
 
@@ -108,10 +144,11 @@ class EnemyA : public EnemyBase
 
 class EnemyB : public EnemyBase
 {
+public:
 	EnemyB ()
 	{
 		PointsToGrant = 200;
-		Shape = 'B';
+		Shape = 'M';
 	}
 };
 
@@ -119,16 +156,17 @@ class EnemyB : public EnemyBase
 
 class EnemyC : public EnemyBase
 {
+public:
 	EnemyC ()
 	{
 		PointsToGrant = 500;
-		Shape = 'C';
+		Shape = 'W';
 	}
 };
 
 /** Projectile **/
 
-class Projectile : Entity
+class Projectile : public Entity
 {
 	
 };
@@ -196,7 +234,7 @@ private:
 		std::cout << "Presiona una Tecla para comenzar a Jugar" << std::endl;
 		getch();
 		textcolor(WHITE);
-		ScreenClear();
+		clrscr();
 	}
 	
 	void ShowEndScreen()
@@ -206,7 +244,9 @@ private:
 	
 	void ShowHUD()
 	{
-		
+		textcolor(LIGHTGREEN);
+		Screen::DrawBorders();
+		getch();
 	}
 	
 
