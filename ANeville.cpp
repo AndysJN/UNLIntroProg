@@ -1,6 +1,7 @@
 #include <iostream>
 #include <conio2.h>
 #include <windows.h>
+#include <ctime>
 
 /**
 *	Enumerador para identificar a quien pertenece el disparo.
@@ -41,6 +42,17 @@ static void DrawBorders()
 	}
 }
 
+static void Erase(int X, int Y)
+{
+	putchxy(X, Y, ' ');
+}
+
+static void Draw(int X, int Y, int Color, char Shape)
+{
+	textcolor(Color);
+	putchxy(X, Y, Shape);
+}
+
 };
 
 /**
@@ -55,8 +67,7 @@ public:
 	{
 		X = StartX;
 		Y = StartY;
-		textcolor(Color);
-		putchxy(X,Y, Shape);
+		Screen::Draw(X,Y, Color, Shape);
 	}
 	
 protected:
@@ -89,6 +100,31 @@ public:
 			Shape = 'A';
 	}
 	
+	void MoveLeft ()
+	{
+		if (X > Screen::BordeIzq + 1)
+		{
+			Screen::Erase(X, Y);
+			--X;
+			Screen::Draw(X, Y, LIGHTBLUE, Shape);
+		}
+	}
+	
+	void MoveRight()
+	{
+		if (X < Screen::BordeDer - 1)
+		{
+			Screen::Erase(X, Y);
+			++X;
+			Screen::Draw(X, Y, LIGHTBLUE, Shape);
+		}
+	}
+	
+	void Shoot()
+	{
+		
+	}
+	
 	void LoseOneLife()
 	{ 
 		Lives--;
@@ -97,14 +133,6 @@ public:
 			bIsAlive = false;
 		}
 	}
-	
-//	void Spawn (int StartX, int StartY)
-//	{
-//		X = StartX;
-//		Y = StartY;
-//		textcolor(LIGHTBLUE);
-//		putchxy(X,Y, Shape);
-//	}
 	
 	int GetLives() const { return Lives; }
 	
@@ -205,6 +233,14 @@ class Game
 {
 	
 public:
+	//normalizar la velocidad de movimiento
+	
+	const int Velocidad = 15;
+	clock_t Paso = CLOCKS_PER_SEC / Velocidad;
+	clock_t Tempo = clock();
+	
+	// ====================================
+	
 	int Score{0};
 	bool Running = true;
 	bool Victory = false;
@@ -214,9 +250,30 @@ public:
 		Initializate();
 		while (Running)
 		{
-			Sleep(1000);
-			Running = false;
+			char Key {};
+			if (kbhit())
+			{
+				Key = getch();
+				if (Key == 'q')
+				{
+					Running = false;
+					break;
+				}
+			
+				if (clock() - Tempo >= Paso)
+				{
+						if (Key == 'a')
+						{
+							Player->MoveLeft();
+						}
+						else if (Key == 'd')
+						{
+							Player->MoveRight();
+						}
+				}				
+			}
 		}
+		Sleep(1);
 	}
 	
 	~Game()
@@ -234,10 +291,6 @@ private:
 		ShowStartScreen();
 		ShowHUD();
 		Player->Spawn(50, Screen::BordeInf - 1, LIGHTBLUE);
-		getch();
-		UpdateScore(1);
-		UpdateScoreHud();
-		getch();
 	}
 	
 	void ShowStartScreen()
@@ -261,6 +314,8 @@ private:
 		gotoxy(15 ,16);
 		std::cout << "- Sobrevive eliminando a todos los enemigos antes que aterricen" << std::endl;
 		textcolor(RED);
+		gotoxy(15 ,17);
+		std::cout << "- Presiona la 'q' para salir" << std::endl;
 		gotoxy(35 ,25);
 		std::cout << "Presiona una Tecla para comenzar a Jugar" << std::endl;
 		getch();
