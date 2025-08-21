@@ -7,7 +7,7 @@
 *	Enumerador para identificar a quien pertenece el disparo.
 **/
 
-enum class Instigator
+enum class Owner
 {
 	Player,
 	Enemy
@@ -213,7 +213,8 @@ public:
 
 class Projectile : public Entity
 {
-	
+public:
+
 };
 
 /**
@@ -245,36 +246,46 @@ public:
 	bool Running = true;
 	bool Victory = false;
 	
+	void HandleInput()
+	{
+		if (kbhit())
+		{
+			char Key = getch();
+			if (Key == 'q')
+			{
+				Running = false;
+			}
+			
+			if (clock() - Tempo >= Paso)
+			{
+				if (Key == 'a')
+				{
+					Player->MoveLeft();
+					Tempo += Paso;
+				}
+				else if (Key == 'd')
+				{
+					Player->MoveRight();
+					Tempo += Paso;
+				}
+				else if (Key = ' ')
+				{
+					//Implementar disparo
+					//Player->Shoot();
+					Tempo += Paso;
+				}
+			}
+		}
+	}
+	
 	void Play()
 	{
 		Initializate();
 		while (Running)
 		{
-			char Key {};
-			if (kbhit())
-			{
-				Key = getch();
-				if (Key == 'q')
-				{
-					Running = false;
-					break;
-				}
-			
-				if (clock() - Tempo >= Paso)
-				{
-						if (Key == 'a')
-						{
-							Player->MoveLeft();
-						}
-						else if (Key == 'd')
-						{
-							Player->MoveRight();
-						}
-					Tempo += Paso;
-				}
-			}
-		}
+		HandleInput();
 		Sleep(1);
+		}
 	}
 	
 	~Game()
