@@ -55,7 +55,7 @@ public:
 	{
 		X = StartX;
 		Y = StartY;
-		textcolor(LIGHTBLUE);
+		textcolor(Color);
 		putchxy(X,Y, Shape);
 	}
 	
@@ -296,7 +296,7 @@ private:
 		textcolor(WHITE);
 		gotoxy(Screen::BordeIzq + 12, Screen::BordeSup);
 		std::cout << "     ";
-		putchxy(Screen::BordeIzq + 12, Screen::BordeSup);
+		gotoxy(Screen::BordeIzq + 12, Screen::BordeSup);
 		std::cout << Score;
 	}
 	
