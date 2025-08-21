@@ -22,22 +22,22 @@ class Screen
 	
 public:
 
-static const int bordeSup = 1;
-static const int bordeInf = 25;
-static const int bordeIzq = 1;
-static const int bordeDer = 100;
+static const int BordeSup = 1;
+static const int BordeInf = 25;
+static const int BordeIzq = 1;
+static const int BordeDer = 100;
 
 static void DrawBorders()
 {
-	for (int x = bordeIzq; x <= bordeDer; ++x) 
+	for (int x = BordeIzq; x <= BordeDer; ++x) 
 	{
-		putchxy(x, bordeInf, '.');
+		putchxy(x, BordeInf, '.');
 	}
 	
-	for (int y = bordeSup; y <= bordeInf; ++y) 
+	for (int y = BordeSup; y <= BordeInf; ++y) 
 	{
-		putchxy(bordeIzq, y, '.');
-		putchxy(bordeDer, y, '.');
+		putchxy(BordeIzq, y, '.');
+		putchxy(BordeDer, y, '.');
 	}
 }
 
@@ -51,6 +51,13 @@ class Entity
 {
 public:
 	void Kill() { bIsAlive = false ;}
+	void Spawn (int StartX, int StartY, int Color)
+	{
+		X = StartX;
+		Y = StartY;
+		textcolor(LIGHTBLUE);
+		putchxy(X,Y, Shape);
+	}
 	
 protected:
 	//Ubicacion en pantalla
@@ -77,6 +84,11 @@ protected:
 	int Lives{3};
 	
 public:
+	PlayerBase ()
+	{
+			Shape = 'A';
+	}
+	
 	void LoseOneLife()
 	{ 
 		Lives--;
@@ -86,13 +98,13 @@ public:
 		}
 	}
 	
-	void Spawn (int StartX, int StartY)
-	{
-		X = StartX;
-		Y = StartY;
-		textcolor(LIGHTBLUE);
-		putchxy(X,Y, 'A');
-	}
+//	void Spawn (int StartX, int StartY)
+//	{
+//		X = StartX;
+//		Y = StartY;
+//		textcolor(LIGHTBLUE);
+//		putchxy(X,Y, Shape);
+//	}
 	
 	int GetLives() const { return Lives; }
 	
@@ -107,7 +119,12 @@ class EnemyBase : public Entity
 public:
 	int HitPoints{1};
 	int PointsToGrant{0};
-	Shape = 'E' ;
+	
+	EnemyBase ()
+	{
+		Shape = 'E' ;
+	}
+	
 	
 	//Puedo implmementar diferentes comportamientos dependiendo el enemigo?
 	//Algunos se pueden poner un poco mas fuertes al recibir disparos ?
@@ -194,8 +211,7 @@ public:
 	
 	void Play()
 	{
-		ShowStartScreen();
-		ShowHUD();
+		Initializate();
 		while (Running)
 		{
 			Sleep(1000);
@@ -203,10 +219,25 @@ public:
 		}
 	}
 	
+	~Game()
+	{
+		delete Player;
+	}
+	
 private:
+		
+	PlayerBase* Player = nullptr;
+		
 	void Initializate()
 	{
-		
+		Player = new PlayerBase;
+		ShowStartScreen();
+		ShowHUD();
+		Player->Spawn(50, Screen::BordeInf - 1, LIGHTBLUE);
+		getch();
+		UpdateScore(1);
+		UpdateScoreHud();
+		getch();
 	}
 	
 	void ShowStartScreen()
@@ -244,9 +275,39 @@ private:
 	
 	void ShowHUD()
 	{
+		// Dibujar Bordes
+		
 		textcolor(LIGHTGREEN);
 		Screen::DrawBorders();
-		getch();
+		
+		// Dibujar Score inicial
+		
+		textcolor(WHITE);
+		gotoxy(Screen::BordeIzq + 5, Screen::BordeSup);
+		std::cout << "Score: " << Score;
+		
+		gotoxy(Screen::BordeDer - 15, Screen::BordeSup);
+		std::cout << "Lives: " << Player->GetLives();
+		
+	}
+	
+	void UpdateScoreHud()
+	{
+		textcolor(WHITE);
+		gotoxy(Screen::BordeIzq + 12, Screen::BordeSup);
+		std::cout << "     ";
+		putchxy(Screen::BordeIzq + 12, Screen::BordeSup);
+		std::cout << Score;
+	}
+	
+	int GetScore()
+	{
+		return Score;
+	}
+	
+	void UpdateScore(int DeltaScore)
+	{
+		Score += DeltaScore;
 	}
 	
 
