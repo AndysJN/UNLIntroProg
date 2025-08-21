@@ -270,7 +270,8 @@ public:
 						{
 							Player->MoveRight();
 						}
-				}				
+					Tempo += Paso;
+				}
 			}
 		}
 		Sleep(1);
@@ -313,9 +314,9 @@ private:
 		std::cout << "- Evitar los disparos enemigos" << std::endl;
 		gotoxy(15 ,16);
 		std::cout << "- Sobrevive eliminando a todos los enemigos antes que aterricen" << std::endl;
-		textcolor(RED);
 		gotoxy(15 ,17);
 		std::cout << "- Presiona la 'q' para salir" << std::endl;
+		textcolor(RED);
 		gotoxy(35 ,25);
 		std::cout << "Presiona una Tecla para comenzar a Jugar" << std::endl;
 		getch();
