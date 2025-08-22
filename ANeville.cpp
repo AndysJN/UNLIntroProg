@@ -76,11 +76,13 @@ protected:
 	int Y{0};
 	//Ubicacion en pantalla
 	char Shape{};
+	int Color = {WHITE};
 	
 	bool bIsAlive = true;
 	
 public:
 	bool GetIsAlive() const { return bIsAlive; }
+	int GetColor() const { return Color; }
 	
 	virtual ~Entity() = default;
 };
@@ -95,6 +97,7 @@ public:
 	{
 		Shape = '|';
 		bIsAlive = false;
+		Color = RED;
 	}
 	
 	void Initialize(int StartX, int StartY, Owner InInsigator)
@@ -103,7 +106,7 @@ public:
 		Y = StartY;
 		Instigator = InInsigator;
 		bIsAlive = true;
-		Screen::Draw(X, Y, RED, Shape);
+		Screen::Draw(X, Y, Color, Shape);
 	}
 	
 	void Movement()
@@ -121,7 +124,7 @@ public:
 			bIsAlive = false;
 			return;
 		}
-		Screen::Draw(X, Y, RED, Shape);
+		Screen::Draw(X, Y, Color, Shape);
 	}
 	
 private:
@@ -146,6 +149,7 @@ public:
 	PlayerBase ()
 	{
 			Shape = 'A';
+			Color = LIGHTBLUE;
 	}
 	
 	void MoveLeft ()
@@ -154,7 +158,7 @@ public:
 		{
 			Screen::Erase(X, Y);
 			--X;
-			Screen::Draw(X, Y, LIGHTBLUE, Shape);
+			Screen::Draw(X, Y, Color, Shape);
 		}
 	}
 	
@@ -164,7 +168,7 @@ public:
 		{
 			Screen::Erase(X, Y);
 			++X;
-			Screen::Draw(X, Y, LIGHTBLUE, Shape);
+			Screen::Draw(X, Y, Color, Shape);
 		}
 	}
 	
@@ -241,6 +245,7 @@ public:
 	{
 		PointsToGrant = 100;
 		Shape = 'H';
+		Color = LIGHTGRAY;
 	}
 };
 
@@ -253,6 +258,7 @@ public:
 	{
 		PointsToGrant = 200;
 		Shape = 'M';
+		Color = YELLOW;
 	}
 };
 
@@ -265,6 +271,7 @@ public:
 	{
 		PointsToGrant = 500;
 		Shape = 'W';
+		Color = LIGHTMAGENTA;
 	}
 };
 /**
@@ -472,7 +479,7 @@ private:
 				{
 					Enemies[i][j] = new EnemyA();
 				}
-				Enemies[i][j]->Spawn(PosToDrawX, PosToDrawY, i+4);
+				Enemies[i][j]->Spawn(PosToDrawX, PosToDrawY, Enemies[i][j]->GetColor());
 				PosToDrawX += 10;
 			}
 			PosToDrawX = InitialPosX;
