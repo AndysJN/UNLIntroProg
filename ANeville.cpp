@@ -83,6 +83,51 @@ public:
 	bool GetIsAlive() const { return bIsAlive; }
 };
 
+/** Projectile **/
+
+class Projectile : public Entity
+{
+public:
+	
+	Projectile()
+	{
+		Shape = '|';
+		bIsAlive = false;
+	}
+	
+	void Initialize(int StartX, int StartY, Owner InInsigator)
+	{
+		X = StartX;
+		Y = StartY;
+		Instigator = InInsigator;
+		bIsAlive = true;
+		Screen::Draw(X, Y, RED, Shape);
+	}
+	
+	void Movement()
+	{
+		if (!bIsAlive)
+		{
+			return;
+		}
+		
+		Screen::Erase(X, Y);
+		Y += (Instigator == Owner::Player) ? -1 : 1;
+		
+		if (Y <= Screen::BordeSup + 1 || Y >= Screen::BordeInf -1)
+		{
+			bIsAlive = false;
+			return;
+		}
+		Screen::Draw(X, Y, RED, Shape);
+	}
+	
+private:
+	Owner Instigator;
+	
+};
+
+
 /**
 *	Clase Base de Jugador.
 **/
@@ -93,6 +138,7 @@ class PlayerBase : public Entity
 	
 protected:
 	int Lives{3};
+	Projectile* MyProjectile = nullptr;
 	
 public:
 	PlayerBase ()
@@ -120,9 +166,20 @@ public:
 		}
 	}
 	
-	void Shoot()
+	void Shoot(Projectile* InProjectile)
 	{
+		if (!InProjectile)
+		{
+			return;
+		}
 		
+		if (InProjectile->GetIsAlive())
+		{
+			return;
+		}
+		
+		MyProjectile = InProjectile;
+		MyProjectile->Initialize(X, Y - 1, Owner::Player);
 	}
 	
 	void LoseOneLife()
@@ -208,15 +265,6 @@ public:
 		Shape = 'W';
 	}
 };
-
-/** Projectile **/
-
-class Projectile : public Entity
-{
-public:
-
-};
-
 /**
 
 Crear una configuracion para la pantalla
@@ -268,10 +316,10 @@ public:
 					Player->MoveRight();
 					Tempo += Paso;
 				}
-				else if (Key = ' ')
+				else if (Key == ' ')
 				{
 					//Implementar disparo
-					//Player->Shoot();
+					Player->Shoot(PlayerProjectile);
 					Tempo += Paso;
 				}
 			}
@@ -284,6 +332,10 @@ public:
 		while (Running)
 		{
 		HandleInput();
+		if (PlayerProjectile && PlayerProjectile->GetIsAlive())
+		{
+			PlayerProjectile->Movement();
+		}
 		Sleep(1);
 		}
 	}
@@ -291,15 +343,18 @@ public:
 	~Game()
 	{
 		delete Player;
+		delete PlayerProjectile;
 	}
 	
 private:
 		
 	PlayerBase* Player = nullptr;
+	Projectile* PlayerProjectile = nullptr;
 		
 	void Initializate()
 	{
 		Player = new PlayerBase;
+		PlayerProjectile = new Projectile;
 		ShowStartScreen();
 		ShowHUD();
 		Player->Spawn(50, Screen::BordeInf - 1, LIGHTBLUE);
