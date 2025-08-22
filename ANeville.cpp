@@ -472,7 +472,7 @@ private:
 				{
 					Enemies[i][j] = new EnemyA();
 				}
-				Enemies[i][j]->Spawn(PosToDrawX, PosToDrawY, WHITE);
+				Enemies[i][j]->Spawn(PosToDrawX, PosToDrawY, i+4);
 				PosToDrawX += 10;
 			}
 			PosToDrawX = InitialPosX;
