@@ -81,6 +81,8 @@ protected:
 	
 public:
 	bool GetIsAlive() const { return bIsAlive; }
+	
+	virtual ~Entity() = default;
 };
 
 /** Projectile **/
@@ -341,12 +343,28 @@ public:
 	{
 		delete Player;
 		delete PlayerProjectile;
+		
+		for (int i = 0; i < Enemy_TotalRows; i++)
+		{
+			for (int j = 0; j < Enemy_TotalColumns; j++)
+			{
+				if (Enemies[i][j])
+				{
+					delete Enemies[i][j];
+					Enemies[i][j] == nullptr;
+				}
+			}
+		}
 	}
 	
 private:
-		
 	PlayerBase* Player = nullptr;
 	Projectile* PlayerProjectile = nullptr;
+	
+	static const int Enemy_TotalRows = 3;
+	static const int Enemy_TotalColumns = 8;
+	
+	EnemyBase* Enemies[Enemy_TotalRows][Enemy_TotalColumns] = {};
 		
 	void Initializate()
 	{
@@ -355,6 +373,7 @@ private:
 		ShowStartScreen();
 		ShowHUD();
 		Player->Spawn(50, Screen::BordeInf - 1, LIGHTBLUE);
+		SpawnEnemies();
 	}
 	
 	void ShowStartScreen()
@@ -427,6 +446,39 @@ private:
 	void UpdateScore(int DeltaScore)
 	{
 		Score += DeltaScore;
+	}
+	
+	void SpawnEnemies()
+	{
+		int InitialPosX = 15;
+		int InitialPosY = 3;
+		
+		int PosToDrawX = InitialPosX;
+		int PosToDrawY = InitialPosY;
+		
+		for (int i = 0; i < Enemy_TotalRows; i++)
+		{
+			for (int j = 0; j < Enemy_TotalColumns; j++)
+			{
+				if (i == 0)
+				{
+					Enemies[i][j] = new EnemyC();
+				}
+				else if (i == 1)
+				{
+					Enemies[i][j] = new EnemyB();
+				}
+				else
+				{
+					Enemies[i][j] = new EnemyA();
+				}
+				Enemies[i][j]->Spawn(PosToDrawX, PosToDrawY, WHITE);
+				PosToDrawX += 10;
+			}
+			PosToDrawX = InitialPosX;
+			PosToDrawY += 2;
+		}
+	
 	}
 	
 
