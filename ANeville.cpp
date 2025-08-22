@@ -81,8 +81,17 @@ protected:
 	bool bIsAlive = true;
 	
 public:
+	
 	bool GetIsAlive() const { return bIsAlive; }
 	int GetColor() const { return Color; }
+	int GetX() const { return X; }
+	int GetY() const { return Y; }
+	
+	void NewPos(int NewX, int NewY) 
+	{ 
+		X = NewX;
+		Y = NewY;
+	}
 	
 	virtual ~Entity() = default;
 };
@@ -300,8 +309,8 @@ public:
 	// ====================================
 	
 	int Score{0};
-	bool Running = true;
-	bool Victory = false;
+	bool bIsRunning = true;
+	bool bVictory = false;
 	
 	void HandleInput()
 	{
@@ -310,7 +319,7 @@ public:
 			char Key = getch();
 			if (Key == 'q')
 			{
-				Running = false;
+				bIsRunning = false;
 			}
 				if (Key == 'a')
 				{
@@ -331,7 +340,7 @@ public:
 	void Play()
 	{
 		Initializate();
-		while (Running)
+		while (bIsRunning)
 		{
 		if (clock() - Tempo >= Paso)
 		{
@@ -342,8 +351,13 @@ public:
 			}
 			Tempo += Paso;
 		}
+		
+		// Mover enemigos
+		
 		Sleep(1);
 		}
+		
+		ShowEndScreen(bVictory);
 	}
 	
 	~Game()
@@ -413,9 +427,20 @@ private:
 		clrscr();
 	}
 	
-	void ShowEndScreen()
+	void ShowEndScreen(bool IsVictory)
 	{
-		
+		if (IsVictory)
+		{
+			clrscr();
+			std::cout << "Ganaste";
+			getch();
+		}
+		else
+		{
+			clrscr();
+			std::cout << "Perdiste";
+			getch();
+		}
 	}
 	
 	void ShowHUD()
@@ -485,6 +510,10 @@ private:
 			PosToDrawX = InitialPosX;
 			PosToDrawY += 2;
 		}
+	}
+	
+	void MoveEnemies()
+	{
 	
 	}
 	
