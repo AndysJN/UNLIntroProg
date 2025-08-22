@@ -86,6 +86,7 @@ public:
 	int GetColor() const { return Color; }
 	int GetX() const { return X; }
 	int GetY() const { return Y; }
+	char GetShape() const { return Shape; }
 	
 	void NewPos(int NewX, int NewY) 
 	{ 
@@ -349,10 +350,12 @@ public:
 			{
 				PlayerProjectile->Movement();
 			}
+			
+			MoveEnemies();
+
 			Tempo += Paso;
 		}
 		
-		// Mover enemigos
 		
 		Sleep(1);
 		}
@@ -514,7 +517,22 @@ private:
 	
 	void MoveEnemies()
 	{
-	
+		for (int i = 0; i < Enemy_TotalRows; ++i)
+		{
+			for (int j  = 0; j < Enemy_TotalColumns; ++j)
+			{
+				EnemyBase* Enemy = Enemies[i][j];
+				if (!Enemy || !Enemy->GetIsAlive())
+				{
+					continue;
+				}
+				
+				Screen::Erase(Enemy->GetX(), Enemy->GetY());
+				Enemy->NewPos(Enemy->GetX() + 1, Enemy->GetY());
+				Screen::Draw(Enemy->GetX(), Enemy->GetY(), Enemy->GetColor(), Enemy->GetShape());
+				Sleep(500);
+			}
+		}
 	}
 	
 
