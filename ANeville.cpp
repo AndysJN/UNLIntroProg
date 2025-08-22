@@ -351,7 +351,7 @@ public:
 				if (Enemies[i][j])
 				{
 					delete Enemies[i][j];
-					Enemies[i][j] == nullptr;
+					Enemies[i][j] = nullptr;
 				}
 			}
 		}
