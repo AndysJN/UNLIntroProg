@@ -303,26 +303,19 @@ public:
 			{
 				Running = false;
 			}
-			
-			if (clock() - Tempo >= Paso)
-			{
 				if (Key == 'a')
 				{
 					Player->MoveLeft();
-					Tempo += Paso;
 				}
 				else if (Key == 'd')
 				{
 					Player->MoveRight();
-					Tempo += Paso;
 				}
 				else if (Key == ' ')
 				{
 					//Implementar disparo
 					Player->Shoot(PlayerProjectile);
-					Tempo += Paso;
 				}
-			}
 		}
 	}
 	
@@ -331,10 +324,14 @@ public:
 		Initializate();
 		while (Running)
 		{
-		HandleInput();
-		if (PlayerProjectile && PlayerProjectile->GetIsAlive())
+		if (clock() - Tempo >= Paso)
 		{
-			PlayerProjectile->Movement();
+			HandleInput();
+			if (PlayerProjectile && PlayerProjectile->GetIsAlive())
+			{
+				PlayerProjectile->Movement();
+			}
+			Tempo += Paso;
 		}
 		Sleep(1);
 		}
