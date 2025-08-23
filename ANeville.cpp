@@ -798,6 +798,7 @@ private:
 						Screen::Erase(ProjectileX, ProjectileY);
 						
 						Player->OnHit();
+						Tempo = clock();
 						UpdateLivesHud();
 						
 						if (!Player->GetIsAlive())
