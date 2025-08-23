@@ -3,6 +3,8 @@
 #include <windows.h>
 #include <ctime>
 
+class Projectile;
+
 /**
 *	Enumerador para identificar a quien pertenece el disparo.
 **/
@@ -94,6 +96,11 @@ public:
 		Y = NewY;
 	}
 	
+	virtual void Shoot(Projectile* InProjectile)
+	{
+		
+	}
+	
 	virtual ~Entity() = default;
 };
 
@@ -129,7 +136,7 @@ public:
 		Screen::Erase(X, Y);
 		Y += (Instigator == Owner::Player) ? -1 : 1;
 		
-		if (Y <= Screen::BordeSup + 1 || Y >= Screen::BordeInf -1)
+		if (Y <= Screen::BordeSup + 1 || Y > Screen::BordeInf -1)
 		{
 			bIsAlive = false;
 			return;
@@ -184,7 +191,7 @@ public:
 		}
 	}
 	
-	void Shoot(Projectile* InProjectile)
+	virtual void Shoot(Projectile* InProjectile) override
 	{
 		if (!InProjectile)
 		{
@@ -219,9 +226,12 @@ public:
 
 class EnemyBase : public Entity
 {
-public:
+protected:
 	int HitPoints{1};
 	int PointsToGrant{0};
+	Projectile* MyProjectile;
+	
+public:
 	
 	EnemyBase ()
 	{
@@ -243,7 +253,22 @@ public:
 		}
 	}
 	
-public:
+	virtual void Shoot(Projectile* InProjectile) override
+	{
+		if (!InProjectile)
+		{
+			return;
+		}
+		
+		if (InProjectile->GetIsAlive())
+		{
+			return;
+		}
+		
+		MyProjectile = InProjectile;
+		MyProjectile->Initialize(X, Y + 1, Owner::Enemy);
+	}
+	
 		int GetPointsToGrant() {return PointsToGrant;}
 };
 
@@ -268,6 +293,7 @@ class EnemyB : public EnemyBase
 public:
 	EnemyB ()
 	{
+		HitPoints = 2;
 		PointsToGrant = 200;
 		Shape = 'M';
 		Color = YELLOW;
@@ -281,6 +307,7 @@ class EnemyC : public EnemyBase
 public:
 	EnemyC ()
 	{
+		HitPoints = 3;
 		PointsToGrant = 500;
 		Shape = 'W';
 		Color = LIGHTMAGENTA;
@@ -354,11 +381,27 @@ public:
 				HandleProjectileCollision(PlayerProjectile);
 			}
 			
+			for (int i = 0; i < MaxEnemyProjectiles; ++i)
+			{
+				if (EnemyProjectiles[i] && EnemyProjectiles[i]->GetIsAlive())
+				{
+					EnemyProjectiles[i]->Movement();
+					HandleProjectileCollision(EnemyProjectiles[i]);
+				}
+			}
+			
 			EnemyTickCount++;
 			if (EnemyTickCount >= EnemyTicksToBeMoved)
 			{
 			MoveEnemies();
 			EnemyTickCount = 0;
+			}
+			
+			EnemyProjectileFireTickCount++;
+			if (EnemyProjectileFireTickCount >= EnemyProjectileTicksToBeFired)
+			{
+				EnemyShooting();
+				EnemyProjectileFireTickCount = 0;
 			}
 
 			Tempo += Paso;
@@ -387,11 +430,25 @@ public:
 				}
 			}
 		}
+		
+		for (int i = 0; i < MaxEnemyProjectiles; ++i)
+		{
+			delete EnemyProjectiles[i];
+			EnemyProjectiles[i] = nullptr;
+		}
 	}
 	
 private:
+		
+	/** Referente al Jugador **/
+		
 	PlayerBase* Player = nullptr;
+	
+	/** Referente al proyectil del Jugador **/
+	
 	Projectile* PlayerProjectile = nullptr;
+	
+	/** Referente a los enemigos **/
 	
 	static const int Enemy_TotalRows = 3;
 	static const int Enemy_TotalColumns = 8;
@@ -400,11 +457,22 @@ private:
 	int EnemyDirection = -1; // -1 Izquierda | +1 Drecha
 	int EnemyTickCount = 0;
 	int EnemyTicksToBeMoved = 15;
+	
+	/** Referente a los proyectiles de los enemigos **/
+	
+	static const int MaxEnemyProjectiles = 3;
+	Projectile* EnemyProjectiles[MaxEnemyProjectiles] = {nullptr, nullptr, nullptr};
+	int EnemyProjectileFireTickCount = 0;
+	int EnemyProjectileTicksToBeFired = 10; //Esto tambien lo puedo incrementar dependiendo la cantidad de enemigos en pantalla.
 		
 	void Initializate()
 	{
 		Player = new PlayerBase;
 		PlayerProjectile = new Projectile;
+		for (int i = 0; i < MaxEnemyProjectiles; ++i)
+		{
+			EnemyProjectiles[i] = new Projectile;
+		}
 		ShowStartScreen();
 		ShowHUD();
 		Player->Spawn(50, Screen::BordeInf - 1, LIGHTBLUE);
@@ -658,7 +726,7 @@ private:
 						if (!Enemy->GetIsAlive())
 						{
 							Screen::Erase(Enemy->GetX(), Enemy->GetY());
-							UpdateScore(Enemy->PointsToGrant); //Tener en cuenta que aca estoy dando puntos solo al matar al enemigo. - por ahora esta bien.
+							UpdateScore(Enemy->GetPointsToGrant()); //Tener en cuenta que aca estoy dando puntos solo al matar al enemigo. - por ahora esta bien.
 							UpdateScoreHud();
 						}
 						else
@@ -694,16 +762,66 @@ private:
 			}
 		}
 	}
-
+	
+	EnemyBase* GetBottomAliveInEachColumn(int InColumn)
+	{
+		for (int i = Enemy_TotalRows - 1; i >= 0; --i)
+		{
+			EnemyBase* Enemy = Enemies[i][InColumn];
+			if (Enemy && Enemy->GetIsAlive())
+			{
+				return Enemy;
+			}
+		}
+		return nullptr;
+	}
+	
+	Projectile* GetEnemyProjectileIfAvailable()
+	{
+		for (int i = 0; i < MaxEnemyProjectiles; ++i)
+		{
+			if (EnemyProjectiles[i] && !EnemyProjectiles[i]->GetIsAlive())
+			{
+				return EnemyProjectiles[i];
+			}
+		}
+		return nullptr;
+	}
+	
+	void EnemyShooting()
+	{
+		Projectile* ProjectileSlot = GetEnemyProjectileIfAvailable();
+		
+		if (!ProjectileSlot)
+		{
+			return;
+		}
+		
+		if ((rand() % 100) < 50)
+		{
+			return;
+		}
+		
+		int StartingColumn = rand() % Enemy_TotalColumns;
+		for (int i = 0; i < Enemy_TotalColumns; ++i)
+		{
+			int ShootingColumn = (StartingColumn + i) % Enemy_TotalColumns;
+			EnemyBase* EnemyShooter = GetBottomAliveInEachColumn(ShootingColumn);
+			if (EnemyShooter)
+			{
+				EnemyShooter->Shoot(ProjectileSlot);
+				break;
+			}
+		}
+	}
 };
 
 int main() 
 {
+	srand(time(NULL));
+	
 	Game G;
 	G.Play();
 	
 	return 0;
 }
-
-/** Funciones de ayuda **/
-
