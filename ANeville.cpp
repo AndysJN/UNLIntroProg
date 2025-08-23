@@ -552,6 +552,15 @@ private:
 		std::cout << Score;
 	}
 	
+	void UpdateLivesHud()
+	{
+		textcolor(WHITE);
+		gotoxy(Screen::BordeDer - 8, Screen::BordeSup);
+		std::cout << "     ";
+		gotoxy(Screen::BordeDer - 8, Screen::BordeSup);
+		std::cout << Player->GetLives();
+	}
+	
 	int GetScore()
 	{
 		return Score;
@@ -722,12 +731,12 @@ private:
 						Screen::Erase(ProjectileX, ProjectileY);
 						
 						Enemy->OnHit();
+						UpdateScore(Enemy->GetPointsToGrant());
+						UpdateScoreHud();
 						
 						if (!Enemy->GetIsAlive())
 						{
 							Screen::Erase(Enemy->GetX(), Enemy->GetY());
-							UpdateScore(Enemy->GetPointsToGrant()); //Tener en cuenta que aca estoy dando puntos solo al matar al enemigo. - por ahora esta bien.
-							UpdateScoreHud();
 						}
 						else
 						{
@@ -749,6 +758,7 @@ private:
 					Screen::Erase(ProjectileX, ProjectileY);
 					
 					Player->LoseOneLife();
+					UpdateLivesHud();
 					
 					if (!Player->GetIsAlive())
 					{
