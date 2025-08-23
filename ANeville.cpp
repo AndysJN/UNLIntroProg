@@ -137,6 +137,8 @@ public:
 		Screen::Draw(X, Y, Color, Shape);
 	}
 	
+	Owner GetOwner() { return Instigator; }
+	
 private:
 	Owner Instigator;
 	
@@ -349,12 +351,12 @@ public:
 			if (PlayerProjectile && PlayerProjectile->GetIsAlive())
 			{
 				PlayerProjectile->Movement();
+				HandleProjectileCollision(PlayerProjectile);
 			}
 			
 			EnemyTickCount++;
 			if (EnemyTickCount >= EnemyTicksToBeMoved)
 			{
-				
 			MoveEnemies();
 			EnemyTickCount = 0;
 			}
@@ -535,6 +537,7 @@ private:
 		int MaximunX = -1000;
 		int MaximunY = -1000;
 		bool bAreEnemiesAlive = false;
+		int AliveEnemyCounter = 0;
 		
 		for (int i = 0; i < Enemy_TotalRows; ++i)
 		{
@@ -545,7 +548,10 @@ private:
 				{
 					continue;
 				}
+				
 				bAreEnemiesAlive = true;
+				AliveEnemyCounter++;
+				
 				if (Enemy->GetX() < MinimunX)
 				{
 					MinimunX = Enemy->GetX();
@@ -561,6 +567,8 @@ private:
 			}
 		}
 		
+		//Debug para despues contar enemigos, armar bloques para uqe la velocidad aumente
+		//std::cout << AliveEnemyCounter;
 		
 		if (!bAreEnemiesAlive)
 		{
@@ -597,6 +605,9 @@ private:
 				bIsRunning = false;
 				return;
 			}
+			
+			//Evitar que bajen y se muevan horizonzalmente en el mismo ciclo.
+			return; 
 		}
 		
 		for (int i = 0; i < Enemy_TotalRows; ++i)
@@ -616,6 +627,73 @@ private:
 		}
 	}
 	
+	void HandleProjectileCollision(Projectile* InProjectile)
+	{
+		if (!InProjectile || !InProjectile->GetIsAlive())
+		{
+			return;
+		}
+		
+		int ProjectileX = InProjectile->GetX();
+		int ProjectileY = InProjectile->GetY();
+		
+		if (InProjectile->GetOwner() == Owner::Player)
+		{
+			for (int i = 0; i < Enemy_TotalRows; ++i)
+			{
+				for (int j  = 0; j < Enemy_TotalColumns; ++j)
+				{
+					EnemyBase* Enemy = Enemies[i][j];
+					if (!Enemy || !Enemy->GetIsAlive())
+					{
+						continue;
+					}
+					if (Enemy->GetX() == ProjectileX && Enemy->GetY() == ProjectileY)
+					{
+						InProjectile->Kill();
+						Screen::Erase(ProjectileX, ProjectileY);
+						
+						Enemy->OnHit();
+						
+						if (!Enemy->GetIsAlive())
+						{
+							Screen::Erase(Enemy->GetX(), Enemy->GetY());
+							UpdateScore(Enemy->PointsToGrant); //Tener en cuenta que aca estoy dando puntos solo al matar al enemigo. - por ahora esta bien.
+							UpdateScoreHud();
+						}
+						else
+						{
+							Screen::Draw(Enemy->GetX(), Enemy->GetY(), Enemy->GetColor(), Enemy->GetShape());
+						}
+						
+						return;
+					}
+				}
+			}
+		}
+		else if (InProjectile->GetOwner() == Owner::Enemy)
+		{
+			if (Player && Player->GetIsAlive())
+			{
+				if (Player->GetX() == ProjectileX && Player->GetY() == ProjectileY)
+				{
+					InProjectile->Kill();
+					Screen::Erase(ProjectileX, ProjectileY);
+					
+					Player->LoseOneLife();
+					
+					if (!Player->GetIsAlive())
+					{
+						bIsRunning = false;
+					}
+					else
+					{
+						Screen::Draw(Player->GetX(), Player->GetY(), Player->GetColor(), Player->GetShape());
+					}
+				}
+			}
+		}
+	}
 
 };
 
