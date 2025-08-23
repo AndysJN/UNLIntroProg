@@ -341,7 +341,7 @@ class Game
 public:
 	//Normalizar la velocidad de movimiento
 	
-	const int Velocidad = 15;
+	const int Velocidad = 18;
 	clock_t Paso = CLOCKS_PER_SEC / Velocidad;
 	clock_t Tempo = clock();
 	
@@ -387,6 +387,34 @@ public:
 		if (clock() - Tempo >= Paso)
 		{
 			HandleInput();
+			
+			EnemyTickCount++;
+			if (EnemyTickCount >= EnemyTicksToBeMoved)
+			{
+				MoveEnemies();
+				EnemyTickCount = 0;
+			}
+			
+			EnemyProjectileFireTickCount++;
+			if (EnemyProjectileFireTickCount >= EnemyProjectileTicksToBeFired)
+			{
+				EnemyShooting();
+				EnemyProjectileFireTickCount = 0;
+			}
+			
+			if (PlayerProjectile && PlayerProjectile->GetIsAlive())
+			{
+				HandleProjectileCollision(PlayerProjectile);
+			}
+			
+			for (int i = 0; i < MaxEnemyProjectiles; ++i)
+			{
+				if (EnemyProjectiles[i] && EnemyProjectiles[i]->GetIsAlive())
+				{
+					HandleProjectileCollision(EnemyProjectiles[i]);
+				}
+			}
+			
 			if (PlayerProjectile && PlayerProjectile->GetIsAlive())
 			{
 				PlayerProjectile->Movement();
@@ -401,20 +429,6 @@ public:
 					HandleProjectileCollision(EnemyProjectiles[i]);
 				}
 			}
-			
-			EnemyTickCount++;
-			if (EnemyTickCount >= EnemyTicksToBeMoved)
-			{
-			MoveEnemies();
-			EnemyTickCount = 0;
-			}
-			
-			EnemyProjectileFireTickCount++;
-			if (EnemyProjectileFireTickCount >= EnemyProjectileTicksToBeFired)
-			{
-				EnemyShooting();
-				EnemyProjectileFireTickCount = 0;
-			}
 
 			Tempo += Paso;
 		}
@@ -423,6 +437,7 @@ public:
 		Sleep(1);
 		}
 		
+		Sleep (150);
 		ShowEndScreen(bVictory);
 	}
 	
