@@ -351,7 +351,13 @@ public:
 				PlayerProjectile->Movement();
 			}
 			
+			EnemyTickCount++;
+			if (EnemyTickCount >= EnemyTicksToBeMoved)
+			{
+				
 			MoveEnemies();
+			EnemyTickCount = 0;
+			}
 
 			Tempo += Paso;
 		}
@@ -390,6 +396,8 @@ private:
 	
 	EnemyBase* Enemies[Enemy_TotalRows][Enemy_TotalColumns] = {};
 	int EnemyDirection = -1; // -1 Izquierda | +1 Drecha
+	int EnemyTickCount = 0;
+	int EnemyTicksToBeMoved = 15;
 		
 	void Initializate()
 	{
