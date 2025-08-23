@@ -215,6 +215,19 @@ public:
 	virtual void OnHit() override
 	{
 		LoseOneLife();
+		
+		if (!GetIsAlive())
+		{
+			return;
+		}
+		
+		for (int i = 0; i < 3; ++i)
+		{
+			Screen::Erase(GetX(), GetY());
+			Sleep(100);
+			Screen::Draw(GetX(), GetY(), GetColor(), GetShape());
+			Sleep(80);
+		}
 	}
 	
 	void LoseOneLife()
