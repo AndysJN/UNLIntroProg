@@ -101,6 +101,11 @@ public:
 		
 	}
 	
+	virtual void OnHit()
+	{
+		
+	}
+	
 	virtual ~Entity() = default;
 };
 
@@ -207,6 +212,11 @@ public:
 		MyProjectile->Initialize(X, Y - 1, Owner::Player);
 	}
 	
+	virtual void OnHit() override
+	{
+		LoseOneLife();
+	}
+	
 	void LoseOneLife()
 	{ 
 		Lives--;
@@ -244,7 +254,7 @@ public:
 	//Podria ser que por cada disparo recibido aumente la cantidad de puntos?
 	//Podrian reaccion al disparo iniciando un disparo en forma de represaria
 	//al morir?
-	virtual void OnHit()
+	virtual void OnHit() override
 	{
 		HitPoints--;
 		if (HitPoints <= 0)
@@ -714,62 +724,67 @@ private:
 		int ProjectileX = InProjectile->GetX();
 		int ProjectileY = InProjectile->GetY();
 		
-		if (InProjectile->GetOwner() == Owner::Player)
+		switch (InProjectile->GetOwner())
 		{
-			for (int i = 0; i < Enemy_TotalRows; ++i)
-			{
-				for (int j  = 0; j < Enemy_TotalColumns; ++j)
+			case Owner::Player:
+				for (int i = 0; i < Enemy_TotalRows; ++i)
 				{
-					EnemyBase* Enemy = Enemies[i][j];
-					if (!Enemy || !Enemy->GetIsAlive())
+					for (int j  = 0; j < Enemy_TotalColumns; ++j)
 					{
-						continue;
+						EnemyBase* Enemy = Enemies[i][j];
+						if (!Enemy || !Enemy->GetIsAlive())
+						{
+							continue;
+						}
+						if (Enemy->GetX() == ProjectileX && Enemy->GetY() == ProjectileY)
+						{
+							InProjectile->Kill();
+							Screen::Erase(ProjectileX, ProjectileY);
+							
+							Enemy->OnHit();
+							UpdateScore(Enemy->GetPointsToGrant());
+							UpdateScoreHud();
+							
+							if (!Enemy->GetIsAlive())
+							{
+								Screen::Erase(Enemy->GetX(), Enemy->GetY());
+							}
+							else
+							{
+								Screen::Draw(Enemy->GetX(), Enemy->GetY(), Enemy->GetColor(), Enemy->GetShape());
+							}
+							
+							return;
+						}
 					}
-					if (Enemy->GetX() == ProjectileX && Enemy->GetY() == ProjectileY)
+				}
+				break;
+			
+			case Owner::Enemy:
+				if (Player && Player->GetIsAlive())
+				{
+					if (Player->GetX() == ProjectileX && Player->GetY() == ProjectileY)
 					{
 						InProjectile->Kill();
 						Screen::Erase(ProjectileX, ProjectileY);
 						
-						Enemy->OnHit();
-						UpdateScore(Enemy->GetPointsToGrant());
-						UpdateScoreHud();
+						Player->OnHit();
+						UpdateLivesHud();
 						
-						if (!Enemy->GetIsAlive())
+						if (!Player->GetIsAlive())
 						{
-							Screen::Erase(Enemy->GetX(), Enemy->GetY());
+							bIsRunning = false;
 						}
 						else
 						{
-							Screen::Draw(Enemy->GetX(), Enemy->GetY(), Enemy->GetColor(), Enemy->GetShape());
+							Screen::Draw(Player->GetX(), Player->GetY(), Player->GetColor(), Player->GetShape());
 						}
-						
-						return;
 					}
 				}
-			}
-		}
-		else if (InProjectile->GetOwner() == Owner::Enemy)
-		{
-			if (Player && Player->GetIsAlive())
-			{
-				if (Player->GetX() == ProjectileX && Player->GetY() == ProjectileY)
-				{
-					InProjectile->Kill();
-					Screen::Erase(ProjectileX, ProjectileY);
-					
-					Player->LoseOneLife();
-					UpdateLivesHud();
-					
-					if (!Player->GetIsAlive())
-					{
-						bIsRunning = false;
-					}
-					else
-					{
-						Screen::Draw(Player->GetX(), Player->GetY(), Player->GetColor(), Player->GetShape());
-					}
-				}
-			}
+				break;
+				
+		default:
+			break;
 		}
 	}
 	
