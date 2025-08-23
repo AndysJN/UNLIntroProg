@@ -73,10 +73,8 @@ public:
 	}
 	
 protected:
-	//Ubicacion en pantalla
 	int X{0};
 	int Y{0};
-	//Ubicacion en pantalla
 	char Shape{};
 	int Color = {WHITE};
 	
@@ -370,7 +368,6 @@ public:
 				}
 				else if (Key == ' ')
 				{
-					//Implementar disparo
 					Player->Shoot(PlayerProjectile);
 				}
 		}
@@ -490,7 +487,7 @@ private:
 	static const int MaxEnemyProjectiles = 3;
 	Projectile* EnemyProjectiles[MaxEnemyProjectiles] = {nullptr, nullptr, nullptr};
 	int EnemyProjectileFireTickCount = 0;
-	int EnemyProjectileTicksToBeFired = 10; //Esto tambien lo puedo incrementar dependiendo la cantidad de enemigos en pantalla.
+	int EnemyProjectileTicksToBeFired = 10;
 		
 	void Initializate()
 	{
