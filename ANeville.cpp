@@ -389,6 +389,7 @@ private:
 	static const int Enemy_TotalColumns = 8;
 	
 	EnemyBase* Enemies[Enemy_TotalRows][Enemy_TotalColumns] = {};
+	int EnemyDirection = -1; // -1 Izquierda | +1 Drecha
 		
 	void Initializate()
 	{
@@ -517,6 +518,79 @@ private:
 	
 	void MoveEnemies()
 	{
+		// Tengo que buscar la manera de saber la posicion del bloque en X
+		// para poder hacerlo rebotar, tambien tengo que calcular Y para saber
+		// si llegaron al piso. Voy a intentar buscar eso en base a unos maximos
+		// y minimos opuestos para que se ajusten en la primera busqueda
+		
+		int MinimunX = 1000;
+		int MaximunX = -1000;
+		int MaximunY = -1000;
+		bool bAreEnemiesAlive = false;
+		
+		for (int i = 0; i < Enemy_TotalRows; ++i)
+		{
+			for (int j  = 0; j < Enemy_TotalColumns; ++j)
+			{
+				EnemyBase* Enemy = Enemies[i][j];
+				if (!Enemy || !Enemy->GetIsAlive())
+				{
+					continue;
+				}
+				bAreEnemiesAlive = true;
+				if (Enemy->GetX() < MinimunX)
+				{
+					MinimunX = Enemy->GetX();
+				}
+				if (Enemy->GetX() > MaximunX)
+				{
+					MaximunX = Enemy->GetX();
+				}
+				if (Enemy->GetY() > MaximunY)
+				{
+					MaximunY = Enemy->GetY();
+				}
+			}
+		}
+		
+		
+		if (!bAreEnemiesAlive)
+		{
+			bVictory = true;
+			bIsRunning = false;
+			return;
+		}
+		
+		bool bIsMaximunLeft = (EnemyDirection == -1) && (MinimunX -1 <= Screen::BordeIzq + 1);
+		bool bIsMaximunRight = (EnemyDirection == 1) && (MaximunX + 1 >= Screen::BordeDer -1);
+		
+		if (bIsMaximunLeft || bIsMaximunRight)
+		{
+			for (int i = 0; i < Enemy_TotalRows; ++i)
+			{
+				for (int j  = 0; j < Enemy_TotalColumns; ++j)
+				{
+					EnemyBase* Enemy = Enemies[i][j];
+					if (!Enemy || !Enemy->GetIsAlive())
+					{
+						continue;
+					}
+					
+					Screen::Erase(Enemy->GetX(), Enemy->GetY());
+					Enemy->NewPos(Enemy->GetX(), Enemy->GetY() + 1);
+					Screen::Draw(Enemy->GetX(), Enemy->GetY(), Enemy->GetColor(), Enemy->GetShape());
+				}
+			}
+			
+			EnemyDirection = -EnemyDirection;
+			
+			if (MaximunY + 1 >= Player->GetY())
+			{
+				bIsRunning = false;
+				return;
+			}
+		}
+		
 		for (int i = 0; i < Enemy_TotalRows; ++i)
 		{
 			for (int j  = 0; j < Enemy_TotalColumns; ++j)
@@ -528,9 +602,8 @@ private:
 				}
 				
 				Screen::Erase(Enemy->GetX(), Enemy->GetY());
-				Enemy->NewPos(Enemy->GetX() + 1, Enemy->GetY());
+				Enemy->NewPos(Enemy->GetX() + EnemyDirection, Enemy->GetY());
 				Screen::Draw(Enemy->GetX(), Enemy->GetY(), Enemy->GetColor(), Enemy->GetShape());
-				Sleep(500);
 			}
 		}
 	}
