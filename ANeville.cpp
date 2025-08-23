@@ -161,7 +161,6 @@ private:
 *	Clase Base de Jugador.
 **/
 
-//Por si quiero tener mas de un tipo de player.
 class PlayerBase : public Entity
 {
 	
@@ -261,12 +260,6 @@ public:
 		Shape = 'E' ;
 	}
 	
-	
-	//Puedo implmementar diferentes comportamientos dependiendo el enemigo?
-	//Algunos se pueden poner un poco mas fuertes al recibir disparos ?
-	//Podria ser que por cada disparo recibido aumente la cantidad de puntos?
-	//Podrian reaccion al disparo iniciando un disparo en forma de represaria
-	//al morir?
 	virtual void OnHit() override
 	{
 		HitPoints--;
@@ -336,24 +329,17 @@ public:
 		Color = LIGHTMAGENTA;
 	}
 };
-/**
-
-Crear una configuracion para la pantalla
-
-Crear una clase para el framework del juego (Puntaje, manejo de enemigos)
-
-**/
-
 
 /**
-*	Clase para manejar la logica del juego 
+*	Clase para manejar la logica del loop juego 
+*	Y sus reglas
 **/
 
 class Game
 {
 	
 public:
-	//normalizar la velocidad de movimiento
+	//Normalizar la velocidad de movimiento
 	
 	const int Velocidad = 15;
 	clock_t Paso = CLOCKS_PER_SEC / Velocidad;
@@ -393,6 +379,9 @@ public:
 	void Play()
 	{
 		Initializate();
+		
+		Tempo = clock();
+		
 		while (bIsRunning)
 		{
 		if (clock() - Tempo >= Paso)
@@ -537,25 +526,30 @@ private:
 		if (IsVictory)
 		{
 			clrscr();
-			std::cout << "Ganaste";
+			textcolor(BLUE);
+			gotoxy(43,10);
+			std::cout << "Ganaste!!!" << std::endl;
+			gotoxy(36,11);
+			std::cout << "Tus Puntos finales son: " << GetScore();
 			getch();
 		}
 		else
 		{
 			clrscr();
+			textcolor(LIGHTGRAY);
+			gotoxy(42,10);
 			std::cout << "Perdiste";
+			gotoxy(38,11);
+			std::cout << "Sumaste " << GetScore() << " puntos.";
 			getch();
 		}
 	}
 	
 	void ShowHUD()
 	{
-		// Dibujar Bordes
 		
 		textcolor(LIGHTGREEN);
 		Screen::DrawBorders();
-		
-		// Dibujar Score inicial
 		
 		textcolor(WHITE);
 		gotoxy(Screen::BordeIzq + 5, Screen::BordeSup);
@@ -628,10 +622,6 @@ private:
 	
 	void MoveEnemies()
 	{
-		// Tengo que buscar la manera de saber la posicion del bloque en X
-		// para poder hacerlo rebotar, tambien tengo que calcular Y para saber
-		// si llegaron al piso. Voy a intentar buscar eso en base a unos maximos
-		// y minimos opuestos para que se ajusten en la primera busqueda
 		
 		int MinimunX = 1000;
 		int MaximunX = -1000;
@@ -667,8 +657,35 @@ private:
 			}
 		}
 		
-		//Debug para despues contar enemigos, armar bloques para uqe la velocidad aumente
-		//std::cout << AliveEnemyCounter;
+		if (AliveEnemyCounter < 3)
+		{
+			EnemyTicksToBeMoved = 4;
+			EnemyProjectileTicksToBeFired = 7;
+		}
+		else if (AliveEnemyCounter < 5)
+		{
+			EnemyTicksToBeMoved = 8;
+			EnemyProjectileTicksToBeFired = 8;
+		}
+		else if (AliveEnemyCounter < 8)
+		{
+			EnemyTicksToBeMoved = 10;
+			EnemyProjectileTicksToBeFired = 9;
+		}
+		else if (AliveEnemyCounter < 10)
+		{
+			EnemyTicksToBeMoved = 11;
+		}
+		else if (AliveEnemyCounter < 16)
+		{
+			EnemyTicksToBeMoved = 12;
+		}
+		else if (AliveEnemyCounter < 20)
+		{
+			EnemyTicksToBeMoved = 13;
+		}
+		
+
 		
 		if (!bAreEnemiesAlive)
 		{
@@ -706,7 +723,6 @@ private:
 				return;
 			}
 			
-			//Evitar que bajen y se muevan horizonzalmente en el mismo ciclo.
 			return; 
 		}
 		
@@ -835,7 +851,7 @@ private:
 			return;
 		}
 		
-		if ((rand() % 100) < 50)
+		if ((rand() % 100) < 45)
 		{
 			return;
 		}
